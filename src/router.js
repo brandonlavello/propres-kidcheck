@@ -5,6 +5,7 @@ import AppFooter from "./layout/AppFooter";
 import Components from "./views/Components.vue";
 import Landing from "./views/Landing.vue";
 import Login from "./views/Login.vue";
+import Home from "./views/Home.vue";
 import Register from "./views/Register.vue";
 import Profile from "./views/Profile.vue";
 
@@ -15,10 +16,10 @@ export default new Router({
   routes: [
     {
       path: "/",
-      name: "components",
+      name: "home",
       components: {
         header: AppHeader,
-        default: Components,
+        default: Home,
         footer: AppFooter
       }
     },
