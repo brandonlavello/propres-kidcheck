@@ -165,16 +165,20 @@ export default {
             this.manageSuccessAlertVisibility();
         },
         async clearNumber() {
-            this.current_message_campus = '';
-            this.current_message_spanish = '';
-            try {
-                const responseCampus = await put(this.url[0], this.current_message_campus, {'accept': '*/*'});
-                const responseSpanish = await put(this.url[1], this.current_message_campus, { 'accept': '*/*' });
-
-                console.log("Message cleared successfully for URL:", this.url[0]);
-            } catch (err) {
-                console.error('There was a problem clearing the message for URL:', this.url[0], err);
-            }
+                this.current_message_campus = '';
+                this.current_message_spanish = '';
+                try {
+                    const responseCampus = await put(this.url[0], this.current_message_campus, {'accept': '*/*'});
+                    console.log("Message cleared successfully for URL:", this.url[0]);
+                } catch (err) {
+                    console.error('There was a problem clearing the message for URL:', this.url[0], err);
+                }
+                try {
+                    const responseSpanish = await put(this.url[1], this.current_message_spanish, { 'accept': '*/*' });
+                    console.log("Message cleared successfully for URL:", this.url[0]);
+                } catch (err) {
+                    console.error('There was a problem clearing the message for URL:', this.url[0], err);
+                }
             },
             manageSuccessAlertVisibility() {
                 this.showSuccessAlert = true;
