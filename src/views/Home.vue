@@ -7,14 +7,12 @@
             <span></span>
             <span></span>
             <span></span>
-            <span></span>
-            <span></span>
         </div>
         <template>
         </template>
         <div class="container pt-lg-md">
             <div class="row justify-content-center">
-                <div style="height: 60vh;" class=" col-lg-8">
+                <div style="height: 70vh;" class=" col-lg-8">
                     <div class="card-container">
                         <card type="secondary" shadow header-classes="bg-white pb-5" body-classes="px-lg-5 py-lg-5"
                             class="border-0">
@@ -25,7 +23,7 @@
                                         <li v-for="url in successfulUrls" :key="url">{{ url }}</li>
                                     </ul>
                                     <template v-if="failedUrls.length > 0">
-                                        The following computers didn't work:
+                                        <strong> Error!</strong> The following computers didn't work:
                                         <ul>
                                             <li v-for="url in failedUrls" :key="url">{{ url }}</li>
                                         </ul>
@@ -55,40 +53,23 @@
                         <span><br></span>
                         <span><br></span>
 
-                        <card type="secondary" shadow header-classes="bg-white pb-5" body-classes="px-lg-5 py-lg-5"
-                            class="border-0">
+                        <card v-if="current_message_campus && current_message_campus" type=" secondary" shadow
+                            header-classes="bg-white pb-5" body-classes="px-lg-5 py-lg-5" class="border-0">
                             <template>
                                 <div class="text-muted text-center mb-3">
-                                    <h2>Currently Displaying</h2>
-                                    <h3 style="white-space: pre-line;">{{ current_message }}</h3>
+                                    <h2><strong>Currently Displaying</strong></h2>
+                                    <h4 v-if="current_message_campus" style="white-space: pre-line;">
+                                        <strong>Campus:</strong> {{
+                                        current_message_campus }}</h4>
+                                    <h4 v-else> <strong>Campus:</strong> Blank</h4>
+                                    <h4 v-if="current_message_spanish" style="white-space: pre-line;">
+                                        <strong>Spanish:</strong> {{
+                                        current_message_spanish }}
+                                    </h4>
+                                    <h4 v-else> <strong>Spanish:</strong> Blank</h4>
                                 </div>
                             </template>
                         </card>
-
-                        <!-- <div class="row justify-content-center">
-                            <base-button type="primary" class="btn btn-neutral btn-icon" @click="modals.modal0 = true">
-                                Set IP Addresses
-                            </base-button>
-                            <modal :show.sync="modals.modal0">
-                                <template slot="header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Set IP Addresses</h5>
-                                </template>
-                                <div>
-                                    <base-input v-model="new_url[0]" alternative class="mb-3" placeholder="IP Address 1"
-                                        addon-left-icon="ni ni-align-left-2">
-                                    </base-input>
-                                    <base-input v-model="new_url[1]" alternative class="mb-3" placeholder="IP Address 2"
-                                        addon-left-icon="ni ni-align-left-2">
-                                    </base-input>
-                                </div>
-                                <template slot="footer">
-                                    <base-button type="secondary" @click="modals.modal0 = false">Close</base-button>
-                                    <base-button type="primary">Save changes</base-button>
-                                </template>
-                            </modal>
-
-                        </div> -->
-
                     </div>
                 </div>
             </div>
@@ -100,7 +81,6 @@
 import { ref } from 'vue';
 import { get, post, put } from '@/helpers/fetchWrapper.js';
 import Modal from '@/components/Modal.vue';
-import { reactive, provide } from 'vue';
 
 const message = ref('')
 
@@ -109,9 +89,9 @@ export default {
   data() {
     return {
       new_message: '',
-      current_message: '',
-      url: ['http://10.10.10.117:1025/v1/stage/message'],
-      new_url: [''],
+      current_message_campus: '',
+      current_message_spanish: '',
+        url: ['http://10.10.20.15:1025/v1/stage/message', 'http://10.10.10.10:1025/v1/stage/message'],
       showSuccessAlert: false,
       successfulUrls: [], // Array to store successful URLs
       failedUrls: [], // Array to store failed URLs
@@ -136,12 +116,15 @@ export default {
     },
     methods: {
         async fetchCurrentStageMessage(){
-            const getUrl = 'http://10.10.10.117:1025/v1/stage/message?chunked=false';
-
+            const getUrl = ['http://10.10.10.10:1025/v1/stage/message?chunked=false','http://10.10.20.15:1025/v1/stage/message'];
             try {
-                const response = await get(getUrl, { 'accept': '*/*' });
-                console.log("Get Response", response);
-                this.current_message = response;
+                const responseCampus = await get(getUrl[0], { 'accept': '*/*' });
+                console.log("Get Response Campus", responseCampus);
+                this.current_message_campus = responseCampus;
+
+                const responseSpanish = await get(getUrl[1], { 'accept': '*/*' });
+                console.log("Get Response Spanish", responseSpanish);
+                this.current_message_spanish = responseSpanish;
             } catch (err) {
                 // Handle
             }
@@ -161,13 +144,12 @@ export default {
 
             // Finalize the success alert visibility after all URLs are processed
             this.manageSuccessAlertVisibility();
+            this.new_message = '';
         },
         async submitNumber(url) {
             try {
                 const response = await put(url, this.new_message, {'accept': '*/*'});
                 if (response) {
-                this.current_message = this.new_message;
-                this.new_message = '';
                 console.log("Message set successfully for URL:", url);
                 this.successfulUrls.push(url);
                 }
@@ -181,9 +163,12 @@ export default {
             this.manageSuccessAlertVisibility();
         },
         async clearNumber() {
-            this.current_message = '';
+            this.current_message_campus = '';
+            this.current_message_spanish = '';
             try {
-                const response = await put(this.url[0], this.current_message, {'accept': '*/*'});
+                const responseCampus = await put(this.url[0], this.current_message_campus, {'accept': '*/*'});
+                const responseSpanish = await put(this.url[1], this.current_message_campus, { 'accept': '*/*' });
+
                 console.log("Message cleared successfully for URL:", this.url[0]);
             } catch (err) {
                 console.error('There was a problem clearing the message for URL:', this.url[0], err);
@@ -199,6 +184,7 @@ export default {
     }
 }
 </script>
+
 <style>
 .card-container {
     display: flex;
