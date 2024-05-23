@@ -44,7 +44,7 @@
                                     </base-input>
                                     <div class="text-center">
                                         <base-button @click="onSubmit" type="primary" class="my-4">Submit</base-button>
-                                        <base-button @click="clearNumber" type="primary"
+                                        <base-button @click="clearNumber" type="secondary"
                                             class="my-4">Clear</base-button>
                                     </div>
                                 </form>
