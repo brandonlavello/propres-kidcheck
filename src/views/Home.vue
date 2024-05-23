@@ -39,7 +39,8 @@
                             <template>
                                 <form role="form">
                                     <base-input v-model="new_message" alternative class="mb-3"
-                                        placeholder="Kid Check Number" addon-left-icon="ni ni-align-left-2">
+                                        placeholder="Kid Check Number" addon-left-icon="ni ni-align-left-2"
+                                        @keydown.enter="onSubmit">
                                     </base-input>
                                     <div class="text-center">
                                         <base-button @click="onSubmit" type="primary" class="my-4">Submit</base-button>
@@ -60,7 +61,8 @@
                                     <h2><strong>Currently Displaying</strong></h2>
                                     <h4 v-if="current_message_campus" style="white-space: pre-line;">
                                         <strong>Campus:</strong> {{
-                                        current_message_campus }}</h4>
+                                        current_message_campus }}
+                                    </h4>
                                     <h4 v-else> <strong>Campus:</strong> Blank</h4>
                                     <h4 v-if="current_message_spanish" style="white-space: pre-line;">
                                         <strong>Spanish:</strong> {{

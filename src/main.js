@@ -18,16 +18,12 @@
 import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
-import VueNativeSock from 'vue-native-websocket-vue3';
 import Argon from "./plugins/argon-kit";
 import './registerServiceWorker'
 
 Vue.config.productionTip = false;
 Vue.use(Argon);
 
-// Vue.use(VueNativeSock, 'ws://10.10.10.117:8080', {
-//   format: 'json',
-// });
 
 
 new Vue({
