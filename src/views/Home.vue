@@ -93,7 +93,7 @@ export default {
       new_message: '',
       current_message_campus: '',
       current_message_spanish: '',
-        url: ['http://10.10.20.15:1025/v1/stage/message', 'http://10.10.10.10:1025/v1/stage/message'],
+        url: ['http://10.10.10.10:1025/v1/stage/message?chunked=false', 'http://10.10.20.15:1025/v1/stage/message'],
       showSuccessAlert: false,
       successfulUrls: [], // Array to store successful URLs
       failedUrls: [], // Array to store failed URLs
@@ -136,10 +136,10 @@ export default {
             this.failedUrls = [];
             this.showSuccessAlert = false; // Hide the alert before starting
 
+            const promises = this.url.map(url => this.submitNumber(url));
+
             try {
-                for (const url of this.url) {
-                    await this.submitNumber(url);
-                }
+                await Promise.allSettled(promises);
             } catch (err) {
                 console.error('Error during submit:', err);
             }
@@ -150,15 +150,26 @@ export default {
         },
         async submitNumber(url) {
             try {
-                const response = await put(url, this.new_message, {'accept': '*/*'});
-                if (response) {
-                console.log("Message set successfully for URL:", url);
-                this.successfulUrls.push(url);
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': '*/*'
+                    },
+                    body: JSON.stringify(this.new_message)
+                });
+
+                if (response.ok) {
+                    console.log("Message set successfully for URL:", url);
+                    this.successfulUrls.push(url);
+                } else {
+                    throw new Error('Network response was not ok');
                 }
             } catch (err) {
                 console.error('There was a problem setting the message for URL:', url, err);
                 this.failedUrls.push(url);
             }
+
             await this.fetchCurrentStageMessage();
 
             // Update the success alert visibility after each URL is processed
