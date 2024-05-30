@@ -97,8 +97,8 @@ import { VBPopover } from "bootstrap-vue/esm/directives/popover/popover";
 import "bootstrap-vue/dist/bootstrap-vue.min.css";
 
 const message = ref('')
-const CAMPUS_BASE_URL = 'http://10.10.21.13:1025';
-const SPANISH_BASE_URL = 'http://10.10.21.14:1025';
+const CAMPUS_BASE_URL = 'http://10.10.10.10:1025';
+const SPANISH_BASE_URL = 'http://10.10.20.15:1025';
 const GET_PATH = '/v1/stage/message?chunked=false';
 const POST_PATH =  '/v1/stage/message';
 
