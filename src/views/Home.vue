@@ -67,7 +67,11 @@
                       :title="CAMPUS_BASE_URL">
                       Campus
                     </base-button>
-                    <span class="message-text">{{ currentMessageCampus }}</span>
+                    <span v-if="!campusStatus" class="message-text">{{ currentMessageCampus
+                      }}</span>
+                    <span v-else-if="currentMessageCampus" class="message-text">Displaying: {{ currentMessageCampus
+                      }}</span>
+                    <span v-else class="message-text">No message.</span>
                   </div>
                   <br>
 
@@ -76,7 +80,11 @@
                       :title="SPANISH_BASE_URL">
                       Spanish
                     </base-button>
-                    <span class="message-text">{{ currentMessageSpanish }}</span>
+                    <span v-if="!spanishStatus" class="message-text">{{ currentMessageSpanish
+                      }}</span>
+                    <span v-else-if="currentMessageSpanish" class="message-text">Displaying: {{ currentMessageSpanish
+                      }}</span>
+                    <span v-else class="message-text">No message.</span>
                   </div>
                 </div>
               </template>
@@ -98,7 +106,7 @@ import "bootstrap-vue/dist/bootstrap-vue.min.css";
 
 const message = ref('')
 const CAMPUS_BASE_URL = 'http://10.10.10.10:1025';
-const SPANISH_BASE_URL = 'http://10.10.20.15:1025';
+const SPANISH_BASE_URL = 'http://10.10.21.13:1025';
 const GET_PATH = '/v1/stage/message?chunked=false';
 const POST_PATH =  '/v1/stage/message';
 
@@ -142,40 +150,57 @@ export default {
       Modal
   },
   methods: {
-    async fetchCurrentStageMessage(){
+    async fetchCurrentStageMessage() {
       const promises = [
         this.fetchMessage(this.campusGetUrl),
         this.fetchMessage(this.spanishGetUrl),
       ];
-      
-      const results = await Promise.allSettled(promises);
 
-      results.forEach((result, index) => {
-        const url = index === 0 ? this.campusGetUrl : this.spanishGetUrl;
+      const [campusPromise, spanishPromise] = promises.map((promise, index) =>
+        promise
+          .then(value => ({
+            status: 'fulfilled',
+            value,
+            index
+          }))
+          .catch(reason => ({
+            status: 'rejected',
+            reason,
+            index
+          }))
+      );
+
+      for (const promise of [campusPromise, spanishPromise]) {
+        const result = await promise;
+
+        const url = result.index === 0 ? this.campusGetUrl : this.spanishGetUrl;
 
         if (result.status === 'fulfilled') {
-          // console.log(`Fetch successful for URL ${index === 0 ? this.campusGetUrl : this.spanishGetUrl}:`, result.value);
+          // console.log(`Fetch successful for URL ${url}:`, result.value);
           if (url === this.campusGetUrl) {
             this.currentMessageCampus = result.value;
             this.campusStatus = true;
+            console.log("Fullfilled campus");
           }
           if (url === this.spanishGetUrl) {
             this.currentMessageSpanish = result.value;
             this.spanishStatus = true;
+            console.log("Fullfilled spanish");
           }
         } else {
-          console.error(`Error fetching from URL ${index === 0 ? this.campusGetUrl : this.spanishGetUrl}:`, result.reason);
+          console.error(`Error fetching from URL ${url}:`, result.reason);
           if (url === this.campusGetUrl) {
-            this.currentMessageCampus = "Device offline."
+            this.currentMessageCampus = "Device offline.";
             this.campusStatus = false;
+            console.log("Failed campus");
           }
           if (url === this.spanishGetUrl) {
-            this.currentMessageSpanish = "Device offline."
+            this.currentMessageSpanish = "Device offline.";
             this.spanishStatus = false;
+            console.log("Failed spanish");
           }
         }
-      });
-
+      }
     },
 
     async fetchMessage(url) {
@@ -242,6 +267,7 @@ export default {
     async clearNumber() {
       if (this.campusStatus) this.currentMessageCampus = '';
       if (this.spanishStatus) this.currentMessageSpanish = '';
+      if (this.newMessage) this.newMessage = '';
 
       try {
         const responseCampus = await put(this.campusPostUrl, this.currentMessageCampus, {'accept': '*/*'});
@@ -291,6 +317,7 @@ export default {
   white-space: pre-line;
   /* Ensure text preserves line breaks */
   color: black;
-  size: 110%;
+  size: 150%;
+  font-size: 150%;
 }
 </style>
